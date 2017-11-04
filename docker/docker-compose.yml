@@ -1,0 +1,39 @@
+version: "2"
+
+services:
+
+    workspace:
+        build:
+            context: ./workspace
+        volumes_from:
+            - volumes_source
+        ports:
+            - "2222:22"
+
+    volumes_source:
+        image: tianon/true
+        volumes:
+            - ../:/var/www/
+
+    nginx:
+        build: ./nginx
+        volumes_from:
+            - volumes_source
+        ports:
+            - "80:80"
+            - "443:443"
+        links:
+            - php-fpm
+
+    php-fpm:
+        build:
+            context: ./php-fpm
+            dockerfile: Dockerfile
+        volumes_from:
+            - volumes_source
+        expose:
+            - 9000
+        ports:
+            - 9001:9001
+        links:
+            - workspace
